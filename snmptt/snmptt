@@ -2706,7 +2706,7 @@ sub loadsnmpttconf
   # @snmptt_conf_files = ();
   undef %event;
 
-  foreach my $snmpttconffile (@snmptt_conf_files)
+  foreach my $snmpttconffile (map { glob } @snmptt_conf_files)
   {
     if ($DEBUGGING >= 1)
     {
