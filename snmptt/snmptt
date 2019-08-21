@@ -1738,7 +1738,9 @@ sub processtrap
                       hostname                     => $var[0],                     # $R,  $r
                       ip_address                   => $var[1],                     # $AR, $ar
                       message                      => $message_short,              # Formatted message
-                      severity                     => $event2[2],                  # $s
+                      severity                     => exists($varbinds{ $event2[2] })
+                                                        ? $varbinds{ $event2[2] }
+                                                        : $event2[2],              # $s or vabind value if specified and exists
                       snmptt_system_name           => $snmptt_system_name,         # $H
                       specific_trap                => $specific_trap,              # $S
                       time                         => $trap_date_time,             # $X & $x
