@@ -2333,7 +2333,7 @@ sub substitute
 
       #s(\$\+$i)($temp:$val)g;		# $+n
       &substitute2 ("\$\+$i", "$temp:$val");
-      $varbinds{$temp} = $val;
+      $varbinds{$temp} = $val if ($temp ne "" && $val ne "(null)");
 
       #s(\$-$i)($temp ($temp2):$val)g;	# $-n
       &substitute2 ("\$-$i", "$temp ($temp2):$val");
