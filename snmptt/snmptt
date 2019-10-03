@@ -216,6 +216,7 @@ my $log_json_statistics_enable;
 my $log_json_statistics_file;
 my $unknown_trap_log_enable;
 my $unknown_trap_log_file;
+my $unknown_trap_log_json_enable;
 my $statistics_interval;
 my $syslog_enable;
 my $syslog_facility;
@@ -375,14 +376,16 @@ if ($syslog_enable == 1 || $syslog_system_enable == 1)
 }
 
 
-if ($log_json_statistics_enable == 1 || $log_json_enable == 1)
+if ($log_json_statistics_enable == 1
+      || $log_json_enable == 1
+      || $unknown_trap_log_json_enable == 1)
 {
   eval 'require JSON::MaybeXS;';
   if ($@) {
     warn $@;
-    print "\nCould not load Perl module JSON!  If log_json_statistics_enable\n";
-    print "or log_json_enable is enabled then the JSON module is\n";
-    print " required.  Please see snmptt.html for system requirements.\n\n";
+    print "\nCould not load Perl module JSON!  If log_json_statistics_enable,\n";
+    print "unknown_trap_log_json_enable or log_json_enable is enabled then the \n";
+    print "JSON module is required.  Please see snmptt.html for system requirements.\n\n";
     die "died";
   }
   require JSON::MaybeXS;
@@ -3824,19 +3827,67 @@ sub searchfortrap
       if ($unknown_trap_log_file ne "") {
         if (open LOGFILE, ">>$unknown_trap_log_file")
         {
-          print LOGFILE scalar($trap_date_time),": Unknown trap ($var[3]) received from $var[0] at: \n";
-          #print out all standard variables
-          for (my $i=0;$i <= $#var;$i++)
+          if ($unknown_trap_log_json_enable == 0)
           {
-            print 	LOGFILE "Value $i: $var[$i]\n";
+            print LOGFILE scalar($trap_date_time),": Unknown trap ($var[3]) received from $var[0] at: \n";
+            #print out all standard variables
+            for (my $i=0;$i <= $#var;$i++)
+            {
+              print 	LOGFILE "Value $i: $var[$i]\n";
+            }
+            #print out all enterprise specific variables
+            for (my $i=0;$i <= $#entvar;$i++)
+            {
+              print LOGFILE "Ent Value $i: $entvarname[$i]=$entvar[$i]\n";
+            }
+
+            print LOGFILE "\n\n";
+            close LOGFILE;
           }
-          #print out all enterprise specific variables
-          for (my $i=0;$i <= $#entvar;$i++)
+          else
           {
-            print LOGFILE "Ent Value $i: $entvarname[$i]=$entvar[$i]\n";
+            my $temp = $_; # Save default value, $_
+
+            $_ = '$G';
+            &substitute;
+            my $generic_trap = int($_); # Get generic trap
+
+            $_ = '$S';
+            &substitute;
+            my $specific_trap = int($_); # Get specific trap
+
+            $_ = $temp; # Restore default value, $_
+
+            eval {
+              my %entvars_hash;
+              @entvars_hash{@entvarname} = @entvar;
+              my $json = JSON::MaybeXS::encode_json(
+                {
+                    agent_hostname              => $agent_dns_name,     # $A
+                    agent_ip_address            => $var[4],             # $aA
+                    community_string            => $var[5],             # $C
+                    context_engine_id           => $var[9],             # v3
+                    context_name                => $var[10],            # v3
+                    enterprise_trap_oid_numeric => $var[6],             # $e
+                    generic_trap                => $generic_trap,       # $G
+                    hostname                    => $var[0],             # $R,  $r
+                    ip_address                  => $var[1],             # $AR, $ar
+                    security_engine_id          => $var[7],             # v3
+                    security_name               => $var[8],             # v3
+                    snmptt_system_name          => $snmptt_system_name, # $H
+                    specific_trap               => $specific_trap,      # $S
+                    time                        => $trap_date_time,     # $X & $x
+                    trap_oid_numeric            => $var[3],
+                    uptime                      => $var[2],             # $T
+                    varbinds                    => \%entvars_hash,
+                }
+              );
+              print LOGFILE "$json\n";
+            };
+            warn "Cannot parse JSON: $@\n" if $@;
+
+            close LOGFILE;
           }
-          print LOGFILE "\n\n";
-          close LOGFILE;
         }
         else
         {
@@ -4200,6 +4251,7 @@ sub loadsnmpttini {
   $log_json_statistics_file = $cfg->val('Logging', 'log_json_statistics_file');
   $unknown_trap_log_enable = $cfg->val('Logging', 'unknown_trap_log_enable');
   $unknown_trap_log_file = $cfg->val('Logging', 'unknown_trap_log_file');
+  $unknown_trap_log_json_enable = $cfg->val('Logging', 'unknown_trap_log_json_enable');
   $statistics_interval = $cfg->val('Logging', 'statistics_interval');
   $syslog_enable = $cfg->val('Logging', 'syslog_enable');
   $syslog_facility = $cfg->val('Logging', 'syslog_facility');
@@ -4348,6 +4400,7 @@ sub loadsnmpttini {
   if (! defined ($log_json_statistics_file)) { $log_json_statistics_file = ''} ;
   if (! defined ($unknown_trap_log_enable)) { $unknown_trap_log_enable = 0} ;
   if (! defined ($unknown_trap_log_file)) { $unknown_trap_log_file = ''} ;
+  if (! defined ($unknown_trap_log_json_enable)) { $unknown_trap_log_json_enable = 0} ;
   if (! defined ($syslog_enable)) { $syslog_enable = 0} ;
   if (! defined ($syslog_facility)) { $syslog_facility = 'local0'} ;
   if (! defined ($statistics_interval)) { $statistics_interval = 0} ;
