@@ -1725,6 +1725,8 @@ sub processtrap
 
               $_ = $temp; # Restore default value, $_
 
+              my %varbinds2 = create_varbinds_hash(%varbinds);
+
               eval {
                 my $json = JSON::MaybeXS::encode_json(
                   {
@@ -1741,8 +1743,8 @@ sub processtrap
                       hostname                     => $var[0],                     # $R,  $r
                       ip_address                   => $var[1],                     # $AR, $ar
                       message                      => $message_short,              # Formatted message
-                      severity                     => exists($varbinds{ $event2[2] })
-                                                        ? $varbinds{ $event2[2] }
+                      severity                     => exists($varbinds2{ $event2[2] })
+                                                        ? $varbinds2{ $event2[2] }
                                                         : $event2[2],              # $s or vabind value if specified and exists
                       snmptt_system_name           => $snmptt_system_name,         # $H
                       specific_trap                => $specific_trap,              # $S
@@ -1750,7 +1752,7 @@ sub processtrap
                       trap_oid_numeric             => $receivedtrap,               # $o
                       trap_oid_symbolic            => $receivedtrap_trans,         # $O
                       uptime                       => $var[2],                     # $T
-                      varbinds                     => \%varbinds,                  # $+*
+                      varbinds                     => \%varbinds2,                 # $+* as key/value pairs
                   }
                 );
                 print LOGFILE "$json\n";
@@ -6369,5 +6371,43 @@ sub preexec_run {
       }
 }
 
+# Given a hash of varbinds:
+# %varbinds = (
+#     "bgpPeerState.10.254.8.242"         => "idle",
+#     "bgpPeerLastError.10.254.8.242"     => "04 00",
+#     "cbgpPeerPrevState.10.254.8.242"    => "active",
+#     "cbgpPeerLastErrorTxt.10.254.8.242" => "hold time expired",
+# );
+#
+# Remove and store iid from varbind OID's as @index key.
+# If there are multiple iid's @index is an array, otherwise a string.
+#
+# Given previous %varbinds, return hash is:
+# $r = {
+#     "@index"               => "10.254.8.242",
+#     "bgpPeerState"         => "idle",
+#     "bgpPeerLastError"     => "04 00",
+#     "cbgpPeerPrevState"    => "active"
+#     "cbgpPeerLastErrorTxt" => "hold time expired",
+# };
+sub create_varbinds_hash {
+    my (%v) = @_;
+    my ( %varbinds, @indexes );
 
+    foreach my $key ( keys %v ) {
+        my ( $oid, $index ) = split( /\./, $key, 2 );
 
+        push( @indexes, $index );
+
+        $varbinds{$oid} = $v{$key};
+    }
+
+    my @unique_indexes = do {
+        my %seen;
+        grep { !$seen{$_}++ } @indexes;
+    };
+
+    $varbinds{'@index'} = @unique_indexes > 1 ? \@unique_indexes : $unique_indexes[0];
+
+    return %varbinds;
+}
