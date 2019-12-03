@@ -24,17 +24,17 @@
 #
 # http://www.sourceforge.net/projects/snmptt
 #
-# This script is an embedded snmptrapd trap handler for use with the NET-SNMP 
+# This script is an embedded snmptrapd trap handler for use with the NET-SNMP
 # / UCD-SNMP and SNMPTT.  ** It can only be run directly from snmptrapd.  **
 #
-# The script is called by defining a perl handler snmptrapd.conf.  
+# The script is called by defining a perl handler snmptrapd.conf.
 # For example:
 #
 # perl do "/sbin/snmptthandler-embedded";
-# 
-# SNMPTTHANDLER-EMBEDDED dumps the received traps into a directory to be 
+#
+# SNMPTTHANDLER-EMBEDDED dumps the received traps into a directory to be
 # processed by the SNMPTT daemon.
-# 
+#
 ##############################################################################
 use strict;
 use Getopt::Long;
@@ -104,7 +104,7 @@ sub snmptt_trap_receiver {
   my $contextEngineID = $$pdu_info{"contextEngineID"} || "unknown";
   $contextEngineID = unpack('h*', $contextEngineID);
 
-  # contextName in hash = snmpCommunityContextName = .1.3.6.1.6.3.18.1.1.1.5 
+  # contextName in hash = snmpCommunityContextName = .1.3.6.1.6.3.18.1.1.1.5
   my $contextName = $$pdu_info{"contextName"} || "unknown";
 
   # snmplib/snmp_api.c:
@@ -113,27 +113,28 @@ sub snmptt_trap_receiver {
   my $securityEngineID = $$pdu_info{"securityEngineID"} || "unknown";
   $securityEngineID = unpack('h*', $securityEngineID);
 
-  # securityName in hash = snmpCommunitySecurityName = .1.3.6.1.6.3.18.1.1.1.3 
+  # securityName in hash = snmpCommunitySecurityName = .1.3.6.1.6.3.18.1.1.1.3
   my $securityName = $$pdu_info{"securityName"} || "unknown";
-  
+
   # SNMPTT expects the 3rd item to be the uptime and the 4th to be the trapname
   my $uptime;
   my $trapname;
   my $other_varbinds;
 
-  # Cycle through all the varbinds  
+  # Cycle through all the varbinds
   foreach my $x (@$varbinds) {
     printf "  %-30s type=%-2d value=%s\n", $x->[0], $x->[2], $x->[1];
 
     my $oid = "$x->[0]";
     my $value = "$x->[1]";
+    $value =~ s/\R//g;
     $value =~ s/^STRING: //g;
     $value =~ s/^INTEGER: //g;
     $value =~ s/^OID: //g;
     $value =~ s/^IpAddress: //g;
     $value =~ s/^Timeticks: //g;
     $value =~ s/^Gauge32: //g;
-    $value =~ s/^Hex-STRING: (.+) $/\1/g;
+    $value =~ s/^Hex-STRING: //g;
 
     if ($oid eq ".1.3.6.1.2.1.1.3.0") {
 #      my $temp = $value;
@@ -155,22 +156,22 @@ sub snmptt_trap_receiver {
   ##############################################################################
   # Create file in spool directory based on current time
   my ($s, $usec) = gettimeofday;
-  
+
   # Pad the numbers with 0's to make sure they are all the same length.  Sometimes the
   # usec is shorter than 6.
   my $s_pad = sprintf("%09d",$s);
   my $usec_pad = sprintf("%06d",$usec);
-  
+
   if ($DEBUGGING >= 1)
   {
-    if ($DEBUGGING_FILE ne '') 
+    if ($DEBUGGING_FILE ne '')
     {
       open DEBUGFILE, ">>$DEBUGGING_FILE"
         or warn "Could not open debug output file ($!)";
-      
+
       select DEBUGFILE;	# Change default output to debug file
     }
-    
+
     # Print out time
     print "-------------------------------------------------------------\n";
     print "SNMPTTHANDLER-EMBEDDED started: ",scalar(localtime),"\n\n";
@@ -178,7 +179,7 @@ sub snmptt_trap_receiver {
     print "s_pad = $s_pad, usec_pad = $usec_pad\n\n";
     print "Data received:\n\n";
   }
-  
+
   my $spoolfile_final = $spool_directory.'#snmptt-trap-'.$s_pad.$usec_pad;
   my $spoolfile = $spoolfile_final;
 
@@ -186,7 +187,7 @@ sub snmptt_trap_receiver {
     # Rename
     $spoolfile = $spool_directory.'x#snmptt-trap-'.$s_pad.$usec_pad;
   }
-  
+
   unless (open SPOOL, ">$spoolfile")
   {
     if ($DEBUGGING >= 1)
@@ -194,7 +195,7 @@ sub snmptt_trap_receiver {
       print "Could not write to file file $spoolfile!  Trap will be lost!\n";
     }
     die "Could not write to file $spoolfile!  Trap will be lost!\n";
-  } 
+  }
 
   if (! $locking_method) {
     flock SPOOL, 2 | 4;           # LOCK_EX | LOCK_NB
@@ -270,13 +271,13 @@ sub loadsnmpttini {
   if ($ini ne '') {
     $configfile = $ini;
   }
-  else {	
+  else {
     if ($^O ne "MSWin32") {
       if (-f '/etc/snmp/snmptt.ini' && -r '/etc/snmp/snmptt.ini') {
-        $configfile = '/etc/snmp/snmptt.ini';    
+        $configfile = '/etc/snmp/snmptt.ini';
       }
       elsif (-f '/etc/snmptt.ini' && -r '/etc/snmptt.ini') {
-        $configfile = '/etc/snmptt.ini';    
+        $configfile = '/etc/snmptt.ini';
       }
       else {
         if ($DEBUGGING >= 1) {
@@ -303,7 +304,7 @@ sub loadsnmpttini {
     warn "Config file ($configfile) could not be loaded\n";
     exit(1);
   }
-  
+
   if (! $cfg)
   {
     if ($DEBUGGING >= 1) {
@@ -311,18 +312,18 @@ sub loadsnmpttini {
     }
     exit(1);
   }
-  
+
   # DaemonMode
   $spool_directory = $cfg->val('DaemonMode', 'spool_directory');
-  
+
   # Debugging
   if ($debug eq '') {
     $DEBUGGING = $cfg->val('Debugging', 'DEBUGGING');
   }
         $DEBUGGING_FILE = $cfg->val('Debugging', 'DEBUGGING_FILE_HANDLER');
-  
+
   $cfg->Delete;
-  
+
   # Defaults Start
   if (! defined ($spool_directory)) { $spool_directory = ''} ;
   if (! defined ($DEBUGGING)) { $DEBUGGING = 0} ;
