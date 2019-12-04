@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# SNMPTTHANDLER v1.5.0
+# SNMPTTHANDLER v1.5.1
 #
 # Copyright 2002-2017 Alex Burger
 # alex_b@users.sourceforge.net
@@ -24,26 +24,26 @@
 #
 # http://www.sourceforge.net/projects/snmptt
 #
-# This script is a snmp trap handler for use with the NET-SNMP / UCD-SNMP 
+# This script is a snmp trap handler for use with the NET-SNMP / UCD-SNMP
 # snmptrapd program and SNMPTT.
 #
-# The script is called by defining a 'traphandle' in snmptrapd.conf.  
+# The script is called by defining a 'traphandle' in snmptrapd.conf.
 # For example:
 #
 # traphandle default /sbin/snmptthandler
-# 
+#
 # SNMPTRAPD feeds details about the trap to the launched program's standard
 # input in the following format (see snmptrapd.conf man page for a complete
 # descriptipon)
 #
 # HOSTNAME: 	The name of the host in question  that  sent the  trap
 # IPADDRESS: 	The IP address of the  host  that  sent  the trap
-# VARBINDS: 	A  list  of  variable bindings that describe the trap and 
-# 		the variables enclosed  in  it.  
+# VARBINDS: 	A  list  of  variable bindings that describe the trap and
+# 		the variables enclosed  in  it.
 #
 # SNMPTTHANDLER dumps the received traps into a directory to be processed
 # by the SNMPTT daemon.
-# 
+#
 ##############################################################################
 use strict;
 
@@ -70,7 +70,7 @@ else {
   require Fcntl;
 }
 
-GetOptions 	('version' => \$version, 
+GetOptions 	('version' => \$version,
 		'debug:i' => \$debug,
 		'debugfile=s' => \$debugfile,
 		'help' => \$help,
@@ -84,7 +84,7 @@ if ($version)
 if ($help)
 {
 my $USAGE = qq/Usage:
-    snmptthandler [<options>] 
+    snmptthandler [<options>]
 Options:
     --debug=n                            Set debug level (1 or 2)
     --debugfile=filename                 Set debug output file
@@ -110,7 +110,7 @@ if ($debug >= 1)
 	$debugcmdline = 1
 }
 
-if ($debugfile ne '') 
+if ($debugfile ne '')
 {
 	$DEBUGGING_FILE = $debugfile;	# commandline overpowers snmptt script
 	$debugfilecmdline = 1;
@@ -119,7 +119,7 @@ if ($debugfile ne '')
 ##############################################################################
 #
 # Load config file start
-# 
+#
 # For Linux / Unix, try /etc/snmp/snmptt.ini first, /etc/snmptt.ini second.
 #
 # For Windows, try %SystemRoot%\snmptt.ini only.
@@ -131,7 +131,7 @@ if ($ini ne '')
   $configfile = $ini;
 }
 else
-{	
+{
  	if ($^O ne "MSWin32")
 	{
 	  $configfile = '/etc/snmp/snmptt.ini';
@@ -167,14 +167,14 @@ my $usec_pad = sprintf("%06d",$usec);
 
 if ($DEBUGGING >= 1)
 {
-	if ($DEBUGGING_FILE ne '') 
+	if ($DEBUGGING_FILE ne '')
 	{
 		open DEBUGFILE, ">>$DEBUGGING_FILE"
 			or warn "Could not open debug output file ($!)";
-	
+
 		select DEBUGFILE;	# Change default output to debug file
 	}
-	
+
 	# Print out time
 	print "SNMPTTHANDLER started: ",scalar(localtime),"\n\n";
 	print "s = $s, usec = $usec\n";
@@ -208,7 +208,7 @@ print SPOOL time()."\n";
 while (defined(my $line = <>))
 {
 	print SPOOL $line;
-	
+
 	if ($DEBUGGING >= 1)
 	{
 		# Print out item passed from snmptrapd
@@ -223,11 +223,11 @@ if ($locking_method) {
   move($spoolfile, $spoolfile_final);
 }
 
-##############################################################################	
+##############################################################################
 
 sub showversion
 {
-	printf "\nSNMPTTHANDLER v1.5.0\n";
+	printf "\nSNMPTTHANDLER v1.5.1\n";
 	printf "(c) 2002-2017 Alex Burger\n\n";
 }
 
@@ -236,9 +236,9 @@ sub showversion
 sub loadsnmpttini {
 
 	##############################################################################
-	# 
+	#
 	# Load config file start
-	# 
+	#
 	use Config::IniFiles;
 	my $cfg;
 
@@ -257,7 +257,7 @@ sub loadsnmpttini {
 	  warn "Config file ($configfile) could not be loaded\n";
 	  exit(1);
 	}
-	
+
 	if (! $cfg)
 	{
 	  if ($DEBUGGING >= 1) {
@@ -265,10 +265,10 @@ sub loadsnmpttini {
 	  }
 	  exit(1);
 	}
-	
+
 	# DaemonMode
 	$spool_directory = $cfg->val('DaemonMode', 'spool_directory');
-	
+
 	# Debugging
 	if ($debugcmdline == 0) {
 	  $DEBUGGING = $cfg->val('Debugging', 'DEBUGGING');
@@ -276,25 +276,25 @@ sub loadsnmpttini {
 	if ($debugfilecmdline == 0) {
 	  $DEBUGGING_FILE = $cfg->val('Debugging', 'DEBUGGING_FILE_HANDLER');
 	}
-	
+
 	$cfg->Delete;
-	
-	# 
+
+	#
 	# Defaults Start
-	# 
+	#
 	if (! defined ($spool_directory)) { $spool_directory = ''} ;
 	if (! defined ($DEBUGGING)) { $DEBUGGING = 0} ;
 	if (! defined ($DEBUGGING_FILE)) { $DEBUGGING_FILE = ''} ;
 	#
 	# Defaults End
-	# 
+	#
 
-	
+
 	# print "Config file loaded\n";
-	
-	# 
+
+	#
 	# Load config file end
-	# 
+	#
 	##############################################################################
 }
 
