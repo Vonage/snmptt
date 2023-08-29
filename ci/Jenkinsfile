@@ -16,7 +16,7 @@ pipeline {
           def release
           withCredentials([string(credentialsId: 'jfrileyiv-github-pat-only', variable: 'PAT')]) {
             sh 'echo ${PAT} | gh auth login --with-token'
-            release = sh "gh release view Vonage/snmptt --json tagName"
+            release = sh "gh release view Vonage/snmptt"
           }
           tag_name = readJSON(text: release).tag_name
           println("tag_name: " + tag_name)
