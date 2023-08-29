@@ -11,7 +11,7 @@ pipeline {
       }
       steps {
         sh "ls -l ./.git"
-        // sh "./ci/scripts/package-snmptt.sh"
+        sh "./ci/scripts/package-snmptt.sh"
       }
     }
 
