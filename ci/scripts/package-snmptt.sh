@@ -14,7 +14,7 @@ sed -re "s/^(Version: ).+/\1${version}/" \
 
 mkdir snmptt-repo
 tar --create --gzip \
-  --directory=$(pwd)snmptt-repo \
+  --directory=$(pwd)/snmptt-repo \
   --exclude=docs/build \
   --file=/root/rpmbuild/SOURCES/snmptt-${version}.tgz \
   snmptt/
