@@ -11,24 +11,26 @@ version=${1#v}
 build=${2}
 package_dir="${1}-${2}"
 
-rpmdev-setuptree
+temp_dir=$(mktemp -d -p ~/)
 
-cp ./ci/files/snmptt.service ~/rpmbuild/SOURCES/
+rpmdev-setuptree --root "${temp_dir}"
+
+cp ./ci/files/snmptt.service "${temp_dir}/rpmbuild/SOURCES/"
 
 sed -re "s/^(Version: ).+/\1${version}/" \
-  ./ci/files/snmptt.spec > ~/rpmbuild/SPECS/snmptt.spec
+  ./ci/files/snmptt.spec > "${temp_dir}/rpmbuild/SPECS/snmptt.spec"
 
 ls -latr
 tar --create --gzip \
   --directory=. \
   --exclude=docs/build \
-  --file=~/rpmbuild/SOURCES/snmptt-${version}.tgz \
+  --file="${temp_dir}/rpmbuild/SOURCES/snmptt-${version}.tgz" \
   snmptt/
 
-rpmbuild -ba ~/rpmbuild/SPECS/snmptt.spec
+rpmbuild -ba "${temp_dir}/rpmbuild/SPECS/snmptt.spec"
 
 mkdir package/
 mkdir "package/${package_dir}"
-find ~/rpmbuild/RPMS/ \
+find "${temp_dir}/rpmbuild/RPMS/" \
   -name '*.noarch.rpm' -exec cp {} "package/${package_dir}" \; , \
   -name '*.noarch.rpm' -exec rpm --query --info --package {} \;
