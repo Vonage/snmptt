@@ -1,15 +1,15 @@
 #!/bin/sh
 set -eux
 
-ref=$(< snmptt-repo/.git/ref)
+ref=$(< .git/ref)
 version=${ref#v} # v1.5.0 -> 1.5.0
 
 rpmdev-setuptree
 
-cp master-repo/ci/files/snmptt/snmptt.service /root/rpmbuild/SOURCES/
+cp ./ci/files/snmptt/snmptt.service /root/rpmbuild/SOURCES/
 
 sed -re "s/^(Version: ).+/\1${version}/" \
-  master-repo/ci/files/snmptt/snmptt.spec > /root/rpmbuild/SPECS/snmptt.spec
+  ./ci/files/snmptt/snmptt.spec > /root/rpmbuild/SPECS/snmptt.spec
 
 tar --create --gzip \
   --directory=snmptt-repo \
