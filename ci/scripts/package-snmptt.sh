@@ -9,7 +9,7 @@ set -eux
 # version=${ref#v} # v1.5.0 -> 1.5.0
 version=${1#v}
 build=${2}
-package_dir="${1}-${2}""
+package_dir="${1}-${2}"
 
 rpmdev-setuptree
 
