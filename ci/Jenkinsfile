@@ -1,9 +1,21 @@
+// Function Definitions
+
+def verifyBuildSuccess(int buildScriptExitStatus) {
+  return (buildScriptExitStatus == 0)
+}
+
+// Global Variable Declarations
 def tag_name
+def buildSucceeded
+
+// Pipeline
+
 pipeline {
   agent any
 
   stages {
     stage('get version') {
+      // version will be stored in the variable tag_name
       agent {
         dockerfile {
           filename 'Dockerfile'
@@ -30,8 +42,6 @@ pipeline {
           }
           tag_name = latestReleaseString.split()[2]
           println("tag_name: " + tag_name)
-          // tag_name = readJSON(text: release).tag_name
-          // println("tag_name: " + tag_name)
         }
       }
     }
@@ -43,9 +53,14 @@ pipeline {
         }
       }
       steps {
-        sh "ls -lR ./.git/refs/"
-        sh "cat ./.git/refs/remotes/origin/master"
-        // sh "./ci/scripts/package-snmptt.sh"
+        script{
+          // sh "ls -lR ./.git/refs/"
+          // sh "cat ./.git/refs/remotes/origin/master"
+          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name}", returnStatus: true)
+          buildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
+          println("buildSucceeded: " + buildSucceeded)
+        }
+        
       }
     }
 
