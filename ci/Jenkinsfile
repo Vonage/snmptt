@@ -69,6 +69,18 @@ pipeline {
     }
 
     // stage('push') {}
+
+    stage('remove package directory from workspace') {
+      agent {
+        docker {
+          image 'alectolytic/rpmbuilder:centos-7'
+          reuseNode true
+          args '-u root'
+        }
+        steps {
+          sh "rm -rf package"
+        }
+    }
   }
 
   post {
