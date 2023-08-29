@@ -96,13 +96,11 @@ pipeline {
 
   post {
     always {
-      steps {
-        script{
-          docker.image('alectolytic/rpmbuilder:centos-7').inside('-u', 'root') {
-            sh "whoami"
-            sh "ls -ltra"
-            sh "rm -rf ."
-          }
+      script{
+        docker.image('alectolytic/rpmbuilder:centos-7').inside('-u', 'root') {
+          sh "whoami"
+          sh "ls -ltra"
+          sh "rm -rf ."
         }
       }
     }
