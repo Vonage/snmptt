@@ -20,7 +20,7 @@ pipeline {
             releases = sh(script: "gh release list --repo Vonage/snmptt", returnStdout: true)
           }
           releaseList = releases.split('\n')
-          println("releaseList: " + releases)
+          println("releaseList: " + releaseList)
           // tag_name = readJSON(text: release).tag_name
           // println("tag_name: " + tag_name)
         }
