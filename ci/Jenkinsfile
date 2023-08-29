@@ -76,7 +76,7 @@ pipeline {
         expression { buildSucceeded }
       }
       steps {
-        sh "TO DO: Push Package to INFRA Sysrepo..."
+        echo "TO DO: Push Package to INFRA Sysrepo..."
       }
     }
 
