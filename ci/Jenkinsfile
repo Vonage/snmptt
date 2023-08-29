@@ -11,6 +11,7 @@ pipeline {
       }
       steps {
         sh "ls -lR ./.git/refs/"
+        sh "cat ./.git/refs/remotes/origin/master"
         sh "./ci/scripts/package-snmptt.sh"
       }
     }
