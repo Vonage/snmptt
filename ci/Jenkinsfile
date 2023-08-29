@@ -72,6 +72,9 @@ pipeline {
     }
 
     stage('push') {
+      when {
+        expression { buildSucceeded }
+      }
       steps {
         sh "TO DO: Push Package to INFRA Sysrepo..."
       }
