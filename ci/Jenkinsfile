@@ -63,12 +63,19 @@ pipeline {
           if (!buildSucceeded) {
             error("Failed to build RPM Package")
           }
+          else {
+            sh "ls -l package"
+          }
         }
         
       }
     }
 
-    // stage('push') {}
+    stage('push') {
+      steps {
+        sh "TO DO: Push Package to INFRA Sysrepo..."
+      }
+    }
 
     stage('remove package directory from workspace') {
       agent {
