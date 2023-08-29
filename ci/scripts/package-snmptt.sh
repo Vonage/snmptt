@@ -1,8 +1,9 @@
 #!/bin/sh
 set -eux
 
-ref=$(< .git/refs)
-version=${ref#v} # v1.5.0 -> 1.5.0
+# ref=$(< .git/refs)
+# version=${ref#v} # v1.5.0 -> 1.5.0
+version=${1#v}
 
 rpmdev-setuptree
 
