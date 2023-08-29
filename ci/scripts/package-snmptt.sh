@@ -22,6 +22,7 @@ tar --create --gzip \
 rpmbuild -ba /root/rpmbuild/SPECS/snmptt.spec
 
 mkdir package
+chown jenkins:jenkins package
 find /root/rpmbuild/RPMS/ \
   -name '*.noarch.rpm' -exec cp {} package/ \; , \
   -name '*.noarch.rpm' -exec rpm --query --info --package {} \;
