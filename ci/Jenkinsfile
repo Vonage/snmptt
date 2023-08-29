@@ -28,10 +28,8 @@ pipeline {
               break
             }
           }
-          def testSplit = latestReleaseString.split()
-          for (str in testSplit) {
-            println(str)
-          }
+          tag_name = latestReleaseString.split()[2]
+          println("tag_name: " + tag_name)
           // tag_name = readJSON(text: release).tag_name
           // println("tag_name: " + tag_name)
         }
