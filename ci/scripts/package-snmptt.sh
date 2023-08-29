@@ -7,21 +7,20 @@ version=${1#v}
 
 rpmdev-setuptree
 
-# cp ./ci/files/snmptt.service /root/rpmbuild/SOURCES/
-cp ./ci/files/snmptt.service ./rpmbuild/SOURCES/
+cp ./ci/files/snmptt/snmptt.service /root/rpmbuild/SOURCES/
 
 sed -re "s/^(Version: ).+/\1${version}/" \
-  ./ci/files/snmptt.spec > ./rpmbuild/SPECS/snmptt.spec
+  ./ci/files/snmptt/snmptt.spec > /root/rpmbuild/SPECS/snmptt.spec
 
 tar --create --gzip \
   --directory=snmptt-repo \
   --exclude=docs/build \
-  --file=./rpmbuild/SOURCES/snmptt-${version}.tgz \
+  --file=/root/rpmbuild/SOURCES/snmptt-${version}.tgz \
   snmptt/
 
-rpmbuild -ba ./rpmbuild/SPECS/snmptt.spec
+rpmbuild -ba /root/rpmbuild/SPECS/snmptt.spec
 
-find ./rpmbuild/RPMS/ \
+find /root/rpmbuild/RPMS/ \
   -name '*.noarch.rpm' -exec cp {} package/ \; , \
   -name '*.noarch.rpm' -exec rpm --query --info --package {} \;
   
