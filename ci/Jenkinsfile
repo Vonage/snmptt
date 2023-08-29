@@ -77,9 +77,10 @@ pipeline {
           reuseNode true
           args '-u root'
         }
-        steps {
-          sh "rm -rf package"
-        }
+      }
+      steps {
+        sh "rm -rf package"
+      }
     }
   }
 
