@@ -21,6 +21,7 @@ tar --create --gzip \
 
 rpmbuild -ba /root/rpmbuild/SPECS/snmptt.spec
 
+mkdir package
 find /root/rpmbuild/RPMS/ \
   -name '*.noarch.rpm' -exec cp {} package/ \; , \
   -name '*.noarch.rpm' -exec rpm --query --info --package {} \;
