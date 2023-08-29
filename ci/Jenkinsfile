@@ -96,14 +96,12 @@ pipeline {
 
   post {
     always {
-      agent {
-        docker {image 'alectolytic/rpmbuilder:centos-7'
-          reuseNode true
-          args '-u root'
-        }
-      }
       steps {
-        sh "rm -rf ."
+        script{
+          docker.image('alectolytic/rpmbuilder:centos-7').inside('-u', 'root') {
+            sh "rm -rf ."
+          }
+        }
       }
     }
   }
