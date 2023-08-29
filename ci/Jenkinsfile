@@ -23,7 +23,7 @@ pipeline {
           releaseList = releases.split('\n')
           println("releaseList: ")
           for(release in releaseList) {
-            if (release.toLowerCase().contains('latest)) {
+            if (release.toLowerCase().contains('latest')) {
               latestReleaseString = release
               break
             }
