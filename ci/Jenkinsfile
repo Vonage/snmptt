@@ -15,6 +15,7 @@ pipeline {
         script {
           def releases
           def releaseList
+          def latestReleaseString
           withCredentials([string(credentialsId: 'jfrileyiv-github-pat-only', variable: 'PAT')]) {
             sh 'echo ${PAT} | gh auth login --with-token'
             releases = sh(script: "gh release list --repo Vonage/snmptt", returnStdout: true)
@@ -22,7 +23,14 @@ pipeline {
           releaseList = releases.split('\n')
           println("releaseList: ")
           for(release in releaseList) {
-            println(release)
+            if (release.toLowerCase().contains('latest)) {
+              latestReleaseString = release
+              break
+            }
+          }
+          def testSplit = latestReleaseString.split()
+          for (str in testSplit) {
+            println(str)
           }
           // tag_name = readJSON(text: release).tag_name
           // println("tag_name: " + tag_name)
