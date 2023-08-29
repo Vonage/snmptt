@@ -11,7 +11,7 @@ version=${1#v}
 build=${2}
 package_dir="${1}-${2}"
 
-temp_dir=$(mktemp -d -p ~/)
+temp_dir=$(mktemp -d -p $(pwd))
 
 rpmdev-setuptree --root "${temp_dir}"
 
