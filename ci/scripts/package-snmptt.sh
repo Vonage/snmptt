@@ -12,8 +12,9 @@ cp ./ci/files/snmptt.service /root/rpmbuild/SOURCES/
 sed -re "s/^(Version: ).+/\1${version}/" \
   ./ci/files/snmptt.spec > /root/rpmbuild/SPECS/snmptt.spec
 
+ls -latr
 mkdir ./snmptt-repo
-mkdir snmptt
+mkdir ./snmptt
 tar --create --gzip \
   --directory=./snmptt-repo \
   --exclude=docs/build \
