@@ -89,20 +89,21 @@ pipeline {
         }
       }
       steps {
-        sh "rm -rf package"
+        sh "rm -rf package/${tag_name.substring(1)}"
       }
     }
   }
 
   post {
     always {
-      script{
-        docker.image('alectolytic/rpmbuilder:centos-7').inside('-u', 'root') {
-          sh "whoami"
-          sh "ls -ltra"
-          sh "rm -rf ."
-        }
-      }
+      cleanWs(cleanWhenAborted: true,
+              cleanWhenFailure: true,
+              cleanWhenNotBuilt: true,
+              cleanWhenSuccess: true,
+              cleanWhenUnstable: true,
+              deleteDirs: true,
+              disableDeferredWipeout: true
+      )
     }
   }
 }
