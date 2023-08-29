@@ -8,29 +8,32 @@ set -eux
 # ref=$(< .git/refs)
 # version=${ref#v} # v1.5.0 -> 1.5.0
 version=${1#v}
-build=${2}
-package_dir="${1}-${2}"
+# build=${2}
+# package_dir="${1}-${2}"
 
-temp_dir=$(mktemp -d -p $(pwd))
+# temp_dir=$(mktemp -d -p $(pwd))
 
-rpmdev-setuptree --root "${temp_dir}"
+# rpmdev-setuptree --root "${temp_dir}"
 
-cp ./ci/files/snmptt.service "${temp_dir}/rpmbuild/SOURCES/"
+mkdir -p ./rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+echo '%_topdir %(echo $(pwd))/rpmbuild' > ~/.rpmmacros
+
+cp ./ci/files/snmptt.service "./rpmbuild/SOURCES/"
 
 sed -re "s/^(Version: ).+/\1${version}/" \
-  ./ci/files/snmptt.spec > "${temp_dir}/rpmbuild/SPECS/snmptt.spec"
+  ./ci/files/snmptt.spec > ./rpmbuild/SPECS/snmptt.spec
 
 ls -latr
 tar --create --gzip \
   --directory=. \
   --exclude=docs/build \
-  --file="${temp_dir}/rpmbuild/SOURCES/snmptt-${version}.tgz" \
+  --file="./rpmbuild/SOURCES/snmptt-${version}.tgz" \
   snmptt/
 
-rpmbuild -ba "${temp_dir}/rpmbuild/SPECS/snmptt.spec"
+rpmbuild -ba ./rpmbuild/SPECS/snmptt.spec
 
 mkdir package/
-mkdir "package/${package_dir}"
-find "${temp_dir}/rpmbuild/RPMS/" \
-  -name '*.noarch.rpm' -exec cp {} "package/${package_dir}" \; , \
+# mkdir "package/${package_dir}"
+find ./rpmbuild/RPMS/ \
+  -name '*.noarch.rpm' -exec cp {} package/ \; , \
   -name '*.noarch.rpm' -exec rpm --query --info --package {} \;
