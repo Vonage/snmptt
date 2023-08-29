@@ -50,6 +50,7 @@ pipeline {
         docker {
           image 'alectolytic/rpmbuilder:centos-7'
           reuseNode true
+          args '-u root'
         }
       }
       steps {
