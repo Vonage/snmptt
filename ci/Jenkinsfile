@@ -10,8 +10,8 @@ pipeline {
         }
       }
       steps {
-        sh "ls -l ./ci/scripts"
-        sh "./ci/scripts/package-snmptt.sh"
+        sh "ls -l ./.git"
+        // sh "./ci/scripts/package-snmptt.sh"
       }
     }
 
