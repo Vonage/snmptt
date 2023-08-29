@@ -60,6 +60,9 @@ pipeline {
           def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name}", returnStatus: true)
           buildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
           println("buildSucceeded: " + buildSucceeded)
+          if (!buildSucceeded) {
+            error("Failed to build RPM Package")
+          }
         }
         
       }
