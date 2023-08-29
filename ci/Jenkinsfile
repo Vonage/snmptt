@@ -13,12 +13,14 @@ pipeline {
       }
       steps {
         script {
+          def releases
           def releaseList
           withCredentials([string(credentialsId: 'jfrileyiv-github-pat-only', variable: 'PAT')]) {
             sh 'echo ${PAT} | gh auth login --with-token'
-            releaseList = sh(script: "gh release list --repo Vonage/snmptt", returnStdout: true)
+            releases = sh(script: "gh release list --repo Vonage/snmptt", returnStdout: true)
           }
-          println("releaseList: " + releaseList)
+          releaseList = releases.split('\n')
+          println("releaseList: " + releases)
           // tag_name = readJSON(text: release).tag_name
           // println("tag_name: " + tag_name)
         }
