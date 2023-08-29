@@ -58,7 +58,7 @@ pipeline {
           // sh "ls -lR ./.git/refs/"
           // sh "cat ./.git/refs/remotes/origin/master"
           // def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} ${currentBuild.number}", returnStatus: true)
-          sh "currentDirectory=\$(pwd) && cd ~ && pwd && cd \$\{currentDirectory\}"
+          sh "currentDirectory=\$(pwd) && cd ~ && pwd && cd \${currentDirectory}"
           def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh \${tag_name}", returnStatus: true)
           buildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
           println("buildSucceeded: " + buildSucceeded)
