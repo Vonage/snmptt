@@ -1,7 +1,28 @@
+def tag_name
 pipeline {
   agent any
 
   stages {
+    stage('get version') {
+      agent {
+        dockerfile {
+          filename 'Dockerfile'
+          dir './ci/'
+          reuseNode true
+        }
+      }
+      steps {
+        script {
+          def release
+          withCredentials([string(credentialsId: 'jfrileyiv-github-pat-only', variable: 'PAT')]) {
+            sh 'echo ${PAT} | gh auth login --with-token'
+            release = sh "gh release view Vonage/snmptt --json tag_name"
+          }
+          tag_name = readJSON(text: release).tag_name
+          println("tag_name: " + tag_name)
+        }
+      }
+    }
     stage('build') {
       agent {
         docker {
@@ -12,7 +33,7 @@ pipeline {
       steps {
         sh "ls -lR ./.git/refs/"
         sh "cat ./.git/refs/remotes/origin/master"
-        sh "./ci/scripts/package-snmptt.sh"
+        // sh "./ci/scripts/package-snmptt.sh"
       }
     }
 
