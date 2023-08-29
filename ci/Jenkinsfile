@@ -97,8 +97,7 @@ pipeline {
   post {
     always {
       agent {
-        docker {
-          image 'alectolytic/rpmbuilder:centos-7'
+        docker {image 'alectolytic/rpmbuilder:centos-7'
           reuseNode true
           args '-u root'
         }
