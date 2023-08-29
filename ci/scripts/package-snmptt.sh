@@ -25,5 +25,3 @@ mkdir package
 find /root/rpmbuild/RPMS/ \
   -name '*.noarch.rpm' -exec cp {} package/ \; , \
   -name '*.noarch.rpm' -exec rpm --query --info --package {} \;
-  
-chown -R jenkins:jenkins package
