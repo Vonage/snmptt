@@ -13,10 +13,8 @@ sed -re "s/^(Version: ).+/\1${version}/" \
   ./ci/files/snmptt.spec > /root/rpmbuild/SPECS/snmptt.spec
 
 ls -latr
-mkdir ./snmptt-repo
-mkdir ./snmptt
 tar --create --gzip \
-  --directory=./snmptt-repo \
+  --directory=. \
   --exclude=docs/build \
   --file=/root/rpmbuild/SOURCES/snmptt-${version}.tgz \
   snmptt/
