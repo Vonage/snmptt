@@ -1,0 +1,32 @@
+pipeline {
+  agent any
+
+  stages {
+    stage('build') {
+      agent {
+        docker {
+          image 'alectolytic/rpmbuilder:centos-7'
+          reuseNode true
+        }
+      }
+      steps {
+        sh "./ci/scripts/package-snmptt.sh"
+      }
+    }
+
+    // stage('push') {}
+  }
+
+  post {
+    always {
+      cleanWs(cleanWhenAborted: true,
+              cleanWhenFailure: true,
+              cleanWhenNotBuilt: true,
+              cleanWhenSuccess: true,
+              cleanWhenUnstable: true,
+              deleteDirs: true,
+              disableDeferredWipeout: true
+      )
+    }
+  }
+}
