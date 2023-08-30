@@ -18,7 +18,7 @@ pipeline {
       // version will be stored in the variable tag_name
       agent {
         dockerfile {
-          filename 'Dockerfile'
+          filename 'Dockerfile.gh-cli'
           dir './ci/'
           reuseNode true
         }
@@ -47,10 +47,10 @@ pipeline {
     }
     stage('build') {
       agent {
-        docker {
-          image 'alectolytic/rpmbuilder:centos-7'
+        dockerfile {
+          filename 'Dockerfile.rpm-builder'
+          dir './ci/'
           reuseNode true
-          // args '-u root'
         }
       }
       steps {
