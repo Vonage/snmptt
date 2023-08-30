@@ -7,6 +7,7 @@ def verifyBuildSuccess(int buildScriptExitStatus) {
 // Global Variable Declarations
 def tag_name
 def buildSucceeded
+def packageName
 
 // Pipeline
 
@@ -66,7 +67,7 @@ pipeline {
             error("Failed to build RPM Package")
           }
           else {
-            sh "ls -l package"
+            packageName = sh(script: "ls package", returnStdout: true).trim()
           }
         }
         
@@ -79,23 +80,24 @@ pipeline {
       }
       steps {
         echo "TO DO: Push Package to INFRA Sysrepo..."
-        sh "ls -l"
-        sh "ls package/}"
+        echo "packageName: ${packageName}"
+        // sh "ls -l"
+        // sh "ls package/}"
       }
     }
 
-    stage('remove package directory from workspace') {
-      agent {
-        docker {
-          image 'alectolytic/rpmbuilder:centos-7'
-          reuseNode true
-          args '-u root'
-        }
-      }
-      steps {
-        sh "rm -rf package/}"
-      }
-    }
+    // stage('remove package directory from workspace') {
+    //   agent {
+    //     docker {
+    //       image 'alectolytic/rpmbuilder:centos-7'
+    //       reuseNode true
+    //       args '-u root'
+    //     }
+    //   }
+    //   steps {
+    //     sh "rm -rf package/}"
+    //   }
+    // }
   }
 
   post {
