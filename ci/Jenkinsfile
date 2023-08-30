@@ -76,6 +76,7 @@ pipeline {
       steps {
         echo "TO DO: Push Package to INFRA Sysrepo..."
         echo "packageName: ${packageName}"
+        sh "stat ./package/${packageName}"
       }
     }
   }
