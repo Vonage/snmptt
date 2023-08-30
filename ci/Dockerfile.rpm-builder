@@ -1,0 +1,10 @@
+FROM rockylinux:latest
+
+USER root
+
+RUN dnf install -y rpmdevtools
+
+RUN useradd -m -s /bin/bash jenkins && \
+    usermod -aG root jenkins
+
+USER jenkins
