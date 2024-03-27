@@ -3,7 +3,8 @@ FROM centos:7
 
 USER root
 
-RUN dnf install -y rpmdevtools systemd-units
+#RUN dnf install -y rpmdevtools systemd-units
+RUN yum install -y rpmdevtools systemd-units
 
 RUN useradd -m -s /bin/bash jenkins && \
     usermod -aG root jenkins
