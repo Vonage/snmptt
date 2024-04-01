@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ${1} = version tag (e.g. v1.5.1)
-# ${2} = os name (e.g. centos7, rocky9
+# ${2} = release number (e.g. 7 for centos7, 9 for rocky9)
 
 set -eux
 
@@ -37,5 +37,5 @@ rpmbuild -ba ./rpmbuild/SPECS/snmptt.spec
 mkdir ${package_dir}
 # mkdir "package/${package_dir}"
 find ./rpmbuild/RPMS/ \
-  -name '*.noarch.rpm' -exec cp {} "${package_dir}" \; , \
-  -name '*.noarch.rpm' -exec rpm --query --info --package {} \;
+  -name "*${2}.noarch.rpm" -exec cp {} "${package_dir}" \; , \
+  -name "*${2}.noarch.rpm" -exec rpm --query --info --package {} \;
