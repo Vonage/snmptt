@@ -64,7 +64,7 @@ pipeline {
       }
       steps {
         script{
-          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name}", returnStatus: true)
+          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} centos7", returnStatus: true)
           buildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
           println("buildSucceeded: " + buildSucceeded)
           if (!buildSucceeded) {
@@ -87,7 +87,7 @@ pipeline {
       }
       steps {
         script{
-          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name}", returnStatus: true)
+          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} rocky9", returnStatus: true)
           buildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
           println("buildSucceeded: " + buildSucceeded)
           if (!buildSucceeded) {
