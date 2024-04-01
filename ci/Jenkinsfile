@@ -71,7 +71,7 @@ pipeline {
             error("Failed to build RPM Package")
           }
           else {
-            centos7PackageName = sh(script: "ls package", returnStdout: true).trim()
+            centos7PackageName = sh(script: "ls package-centos7", returnStdout: true).trim()
           }
         }
         
@@ -94,7 +94,7 @@ pipeline {
             error("Failed to build RPM Package")
           }
           else {
-            rocky9PackageName = sh(script: "ls package", returnStdout: true).trim()
+            rocky9PackageName = sh(script: "ls package-rocky9", returnStdout: true).trim()
           }
         }
       }
