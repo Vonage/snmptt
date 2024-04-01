@@ -7,6 +7,8 @@ def verifyBuildSuccess(int buildScriptExitStatus) {
 // Global Variable Declarations
 def tag_name
 def buildSucceeded
+def centos7BuildSucceeded
+def rocky9BuildSucceeded
 def centos7PackageName
 def rocky9PackageName
 
@@ -65,10 +67,10 @@ pipeline {
       steps {
         script{
           def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} centos7", returnStatus: true)
-          buildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
-          println("buildSucceeded: " + buildSucceeded)
-          if (!buildSucceeded) {
-            error("Failed to build RPM Package")
+          centos7BuildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
+          println("centos7BuildSucceeded: " + centos7BuildSucceeded)
+          if (!centos7BuildSucceeded) {
+            error("Failed to build Centos 7 RPM Package")
           }
           else {
             centos7PackageName = sh(script: "ls package-centos7", returnStdout: true).trim()
@@ -88,10 +90,10 @@ pipeline {
       steps {
         script{
           def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} rocky9", returnStatus: true)
-          buildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
-          println("buildSucceeded: " + buildSucceeded)
-          if (!buildSucceeded) {
-            error("Failed to build RPM Package")
+          rocky9BuildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
+          println("rocky9BuildSucceeded: " + rocky9BuildSucceeded)
+          if (!rocky9BuildSucceeded) {
+            error("Failed to build Rocky 9 RPM Package")
           }
           else {
             rocky9PackageName = sh(script: "ls package-rocky9", returnStdout: true).trim()
@@ -99,14 +101,22 @@ pipeline {
         }
       }
     }
-    stage('push') {
+    stage('push centos7 rpm') {
       when {
-        expression { buildSucceeded }
+        expression { centos7BuildSucceeded }
       }
       steps {
         echo "TO DO: Push Package to INFRA Sysrepo..."
         echo "centos7PackageName: ${centos7PackageName}"
         sh "stat ./package-centos7/${centos7PackageName}"
+      }
+    }
+    stage('push rocky9 rpm') {
+      when {
+        expression { rocky9BuildSucceeded }
+      }
+      steps {
+        echo "TO DO: Push Package to INFRA Sysrepo..."
         echo "rocky9PackageName: ${rocky9PackageName}"
         sh "stat ./package-rocky9/${rocky9PackageName}"
       }
