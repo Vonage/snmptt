@@ -7,7 +7,8 @@ def verifyBuildSuccess(int buildScriptExitStatus) {
 // Global Variable Declarations
 def tag_name
 def buildSucceeded
-def packageName
+def centos7PackageName
+def rocky9PackageName
 
 // Pipeline
 
