@@ -15,6 +15,13 @@ pipeline {
   agent any
 
   stages {
+    stage('fetch ecr token') {
+      steps {
+        script {
+          sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 744520833807.dkr.ecr.us-east-1.amazonaws.com"
+        }
+      }
+    }
     stage('get version') {
       // version will be stored in the variable tag_name
       agent {
@@ -46,11 +53,11 @@ pipeline {
         }
       }
     }
-    stage('build') {
+    stage('build centos7 rpm') {
       agent {
-        dockerfile {
-          filename 'Dockerfile.rpm-builder'
-          dir './ci/'
+        docker {
+          image '744520833807.dkr.ecr.us-east-1.amazonaws.com/mem/rpm-builder:package-snmptt-centos7'
+          registryUrl 'https://744520833807.dkr.ecr.us-east-1.amazonaws.com'
           reuseNode true
         }
       }
@@ -63,10 +70,32 @@ pipeline {
             error("Failed to build RPM Package")
           }
           else {
-            packageName = sh(script: "ls package", returnStdout: true).trim()
+            centos7PackageName = sh(script: "ls package", returnStdout: true).trim()
           }
         }
         
+      }
+    }
+    stage('build rocky9 rpm') {
+      agent {
+        docker {
+          image '744520833807.dkr.ecr.us-east-1.amazonaws.com/mem/rpm-builder:package-snmptt-rocky9'
+          registryUrl 'https://744520833807.dkr.ecr.us-east-1.amazonaws.com'
+          reuseNode true
+        }
+      }
+      steps {
+        script{
+          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name}", returnStatus: true)
+          buildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
+          println("buildSucceeded: " + buildSucceeded)
+          if (!buildSucceeded) {
+            error("Failed to build RPM Package")
+          }
+          else {
+            rocky9PackageName = sh(script: "ls package", returnStdout: true).trim()
+          }
+        }
       }
     }
     stage('push') {
@@ -75,22 +104,24 @@ pipeline {
       }
       steps {
         echo "TO DO: Push Package to INFRA Sysrepo..."
-        echo "packageName: ${packageName}"
-        sh "stat ./package/${packageName}"
+        echo "centos7PackageName: ${centos7PackageName}"
+        sh "stat ./package/${centos7PackageName}"
+        echo "rocky9PackageName: ${rocky9PackageName}"
+        sh "stat ./package/${rocky9PackageName}"
       }
     }
   }
   
-  // post {
-  //   always {
-  //     cleanWs(cleanWhenAborted: true,
-  //             cleanWhenFailure: true,
-  //             cleanWhenNotBuilt: true,
-  //             cleanWhenSuccess: true,
-  //             cleanWhenUnstable: true,
-  //             deleteDirs: true,
-  //             disableDeferredWipeout: true
-  //     )
-  //   }
-  // }
+  post {
+    always {
+      cleanWs(cleanWhenAborted: true,
+              cleanWhenFailure: true,
+              cleanWhenNotBuilt: true,
+              cleanWhenSuccess: true,
+              cleanWhenUnstable: true,
+              deleteDirs: true,
+              disableDeferredWipeout: true
+      )
+    }
+  }
 }
