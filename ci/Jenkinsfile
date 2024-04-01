@@ -106,9 +106,9 @@ pipeline {
       steps {
         echo "TO DO: Push Package to INFRA Sysrepo..."
         echo "centos7PackageName: ${centos7PackageName}"
-        sh "stat ./package/${centos7PackageName}"
+        sh "stat ./package-centos7/${centos7PackageName}"
         echo "rocky9PackageName: ${rocky9PackageName}"
-        sh "stat ./package/${rocky9PackageName}"
+        sh "stat ./package-rocky9/${rocky9PackageName}"
       }
     }
   }
