@@ -66,14 +66,14 @@ pipeline {
       }
       steps {
         script{
-          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} centos7", returnStatus: true)
+          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} 7", returnStatus: true)
           centos7BuildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
           println("centos7BuildSucceeded: " + centos7BuildSucceeded)
           if (!centos7BuildSucceeded) {
             error("Failed to build Centos 7 RPM Package")
           }
           else {
-            centos7PackageName = sh(script: "ls package-centos7", returnStdout: true).trim()
+            centos7PackageName = sh(script: "ls package-7", returnStdout: true).trim()
           }
         }
         
@@ -89,14 +89,14 @@ pipeline {
       }
       steps {
         script{
-          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} rocky9", returnStatus: true)
+          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} 9", returnStatus: true)
           rocky9BuildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
           println("rocky9BuildSucceeded: " + rocky9BuildSucceeded)
           if (!rocky9BuildSucceeded) {
             error("Failed to build Rocky 9 RPM Package")
           }
           else {
-            rocky9PackageName = sh(script: "ls package-rocky9", returnStdout: true).trim()
+            rocky9PackageName = sh(script: "ls package-9", returnStdout: true).trim()
           }
         }
       }
@@ -123,16 +123,16 @@ pipeline {
     }
   }
   
-  // post {
-  //   always {
-  //     cleanWs(cleanWhenAborted: true,
-  //             cleanWhenFailure: true,
-  //             cleanWhenNotBuilt: true,
-  //             cleanWhenSuccess: true,
-  //             cleanWhenUnstable: true,
-  //             deleteDirs: true,
-  //             disableDeferredWipeout: true
-  //     )
-  //   }
-  // }
+  post {
+    always {
+      cleanWs(cleanWhenAborted: true,
+              cleanWhenFailure: true,
+              cleanWhenNotBuilt: true,
+              cleanWhenSuccess: true,
+              cleanWhenUnstable: true,
+              deleteDirs: true,
+              disableDeferredWipeout: true
+      )
+    }
+  }
 }
