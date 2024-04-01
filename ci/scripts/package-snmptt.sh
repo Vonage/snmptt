@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ${1} = version tag (e.g. v1.5.1)
-# ${2} = build number (e.g. what build run from Jenkins this is)
+# ${2} = os name (e.g. centos7, rocky9
 
 set -eux
 
@@ -10,6 +10,7 @@ set -eux
 version=${1#v}
 # build=${2}
 # package_dir="${1}-${2}"
+package_dir="package-${2}/"
 
 # temp_dir=$(mktemp -d -p $(pwd))
 
@@ -32,8 +33,9 @@ tar --create --gzip \
 
 rpmbuild -ba ./rpmbuild/SPECS/snmptt.spec
 
-mkdir package/
+# mkdir package/
+mkdir ${package_dir}
 # mkdir "package/${package_dir}"
 find ./rpmbuild/RPMS/ \
-  -name '*.noarch.rpm' -exec cp {} package/ \; , \
+  -name '*.noarch.rpm' -exec cp {} "${package_dir}" \; , \
   -name '*.noarch.rpm' -exec rpm --query --info --package {} \;
