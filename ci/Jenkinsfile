@@ -120,6 +120,9 @@ pipeline {
           }
           else {
             rocky9PackageName = sh(script: "ls package-9", returnStdout: true).trim()
+            rocky9PackagePath = "${workingDirectory}/package-9/${rocky9PackageName}"
+            println(centos7PackagePath)
+            sh "stat ${rocky9PackagePath}"
           }
         }
       }
