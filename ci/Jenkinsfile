@@ -15,6 +15,7 @@ def rocky9PackageName
 def centos7PackagePath
 def rocky9PackagePath
 def workingDirectory
+def sysrepo = "http://sysrepo2.vgcva0.prod.vonagenetworks.net/cgi-bin/upload.py"
 
 // Pipeline
 
@@ -133,9 +134,13 @@ pipeline {
         expression { centos7BuildSucceeded }
       }
       steps {
-        echo "TO DO: Push Package to INFRA Sysrepo..."
-        echo "centos7PackageName: ${centos7PackageName}"
-        sh "stat ./package-7/${centos7PackageName}"
+        script {
+          curlCommand = "curl -F \"filename=${centos7PackagePath}\" -F \"release=7\" ${sysrepo}"
+          println(curlCommand)
+        }
+        // echo "TO DO: Push Package to INFRA Sysrepo..."
+        // echo "centos7PackageName: ${centos7PackageName}"
+        // sh "stat ./package-7/${centos7PackageName}"
       }
     }
 
