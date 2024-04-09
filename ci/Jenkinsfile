@@ -12,12 +12,25 @@ def rocky9BuildSucceeded
 def centos7PackageName
 def rocky9PackageName
 
+def centos7PackagePath
+def rocky9PackagePath
+def workingDirectory
+
 // Pipeline
 
 pipeline {
   agent any
 
   stages {
+
+    stage('fetch working directory') {
+      steps {
+        script {
+          workingDirectory = sh "pwd" 
+          echo workingDirectory
+        }
+      }
+    }
 
     stage('fetch ecr token') {
       steps {
@@ -127,7 +140,7 @@ pipeline {
         sh "stat ./package-9/${rocky9PackageName}"
       }
     }
-    
+
   }
   
   post {
