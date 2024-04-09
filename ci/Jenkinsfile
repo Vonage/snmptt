@@ -137,6 +137,7 @@ pipeline {
         script {
           curlCommand = "curl -F \"filename=${centos7PackagePath}\" -F \"release=7\" ${sysrepo}"
           println(curlCommand)
+          // sh curlCommand   # TO DO: Uncomment when Production Ready
         }
       }
     }
@@ -149,6 +150,7 @@ pipeline {
         script {
           curlCommand = "curl -F \"filename=${rocky9PackagePath}\" -F \"release=9\" ${sysrepo}"
           println(curlCommand)
+          // sh curlCommand   # TO DO: Uncomment when Production Ready
         }
       }
     }
