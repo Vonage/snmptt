@@ -18,6 +18,7 @@ pipeline {
   agent any
 
   stages {
+
     stage('fetch ecr token') {
       steps {
         script {
@@ -25,6 +26,7 @@ pipeline {
         }
       }
     }
+
     stage('get version') {
       // version will be stored in the variable tag_name
       agent {
@@ -56,6 +58,7 @@ pipeline {
         }
       }
     }
+
     stage('build centos7 rpm') {
       agent {
         docker {
@@ -79,6 +82,7 @@ pipeline {
         
       }
     }
+
     stage('build rocky9 rpm') {
       agent {
         docker {
@@ -101,6 +105,7 @@ pipeline {
         }
       }
     }
+
     stage('push centos7 rpm') {
       when {
         expression { centos7BuildSucceeded }
@@ -111,6 +116,7 @@ pipeline {
         sh "stat ./package-7/${centos7PackageName}"
       }
     }
+
     stage('push rocky9 rpm') {
       when {
         expression { rocky9BuildSucceeded }
@@ -121,6 +127,7 @@ pipeline {
         sh "stat ./package-9/${rocky9PackageName}"
       }
     }
+    
   }
   
   post {
