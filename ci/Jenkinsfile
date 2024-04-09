@@ -27,7 +27,7 @@ pipeline {
       steps {
         script {
           workingDirectory = sh(
-            script: 'pwd'
+            script: 'pwd',
             returnStdout: true
           ).trim()
           println(workingDirectory)
