@@ -27,7 +27,7 @@ pipeline {
       steps {
         script {
           workingDirectory = sh "pwd" 
-          echo workingDirectory
+          println(workingDirectory)
         }
       }
     }
