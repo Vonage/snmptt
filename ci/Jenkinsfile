@@ -93,6 +93,9 @@ pipeline {
           }
           else {
             centos7PackageName = sh(script: "ls package-7", returnStdout: true).trim()
+            centos7PackagePath = "${workingDirectory}/package-7/${centos7PackageName}"
+            println(centos7PackagePath)
+            sh "stat ${centos7PackagePath}"
           }
         }
         
