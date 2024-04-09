@@ -138,9 +138,6 @@ pipeline {
           curlCommand = "curl -F \"filename=${centos7PackagePath}\" -F \"release=7\" ${sysrepo}"
           println(curlCommand)
         }
-        // echo "TO DO: Push Package to INFRA Sysrepo..."
-        // echo "centos7PackageName: ${centos7PackageName}"
-        // sh "stat ./package-7/${centos7PackageName}"
       }
     }
 
@@ -149,9 +146,10 @@ pipeline {
         expression { rocky9BuildSucceeded }
       }
       steps {
-        echo "TO DO: Push Package to INFRA Sysrepo..."
-        echo "rocky9PackageName: ${rocky9PackageName}"
-        sh "stat ./package-9/${rocky9PackageName}"
+        script {
+          curlCommand = "curl -F \"filename=${rocky9PackagePath}\" -F \"release=9\" ${sysrepo}"
+          println(curlCommand)
+        }
       }
     }
 
