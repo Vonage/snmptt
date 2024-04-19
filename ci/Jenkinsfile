@@ -22,6 +22,10 @@ def sysrepo = "http://sysrepo2.vgcva0.prod.vonagenetworks.net/cgi-bin/upload.py"
 pipeline {
   agent any
 
+  triggers {
+    pollSCM('* * * * *')
+  }
+
   stages {
 
     stage('fetch working directory') {
