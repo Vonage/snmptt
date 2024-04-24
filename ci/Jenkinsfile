@@ -1,0 +1,176 @@
+// Function Definitions
+
+def verifyBuildSuccess(int buildScriptExitStatus) {
+  return (buildScriptExitStatus == 0)
+}
+
+// Global Variable Declarations
+def tag_name
+def buildSucceeded
+def centos7BuildSucceeded
+def rocky9BuildSucceeded
+def centos7PackageName
+def rocky9PackageName
+
+def centos7PackagePath
+def rocky9PackagePath
+def workingDirectory
+def sysrepo = "http://sysrepo2.vgcva0.prod.vonagenetworks.net/cgi-bin/upload.py"
+
+// Pipeline
+
+pipeline {
+  agent any
+
+  triggers {
+    pollSCM('* * * * *')
+  }
+
+  stages {
+
+    stage('fetch working directory') {
+      steps {
+        script {
+          workingDirectory = sh(
+            script: 'pwd',
+            returnStdout: true
+          ).trim()
+          println(workingDirectory)
+        }
+      }
+    }
+
+    stage('fetch ecr token') {
+      steps {
+        script {
+          sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 744520833807.dkr.ecr.us-east-1.amazonaws.com"
+        }
+      }
+    }
+
+    stage('get version') {
+      // version will be stored in the variable tag_name
+      agent {
+        dockerfile {
+          filename 'Dockerfile.gh-cli'
+          dir './ci/'
+          reuseNode true
+        }
+      }
+      steps {
+        script {
+          def releases
+          def releaseList
+          def latestReleaseString
+          withCredentials([string(credentialsId: 'jfrileyiv-github-pat-only', variable: 'PAT')]) {
+            sh 'echo ${PAT} | gh auth login --with-token'
+            releases = sh(script: "gh release list --repo Vonage/snmptt", returnStdout: true)
+          }
+          releaseList = releases.split('\n')
+          println("releaseList: ")
+          for(release in releaseList) {
+            if (release.toLowerCase().contains('latest')) {
+              latestReleaseString = release
+              break
+            }
+          }
+          tag_name = latestReleaseString.split()[2]
+          println("tag_name: " + tag_name)
+        }
+      }
+    }
+
+    stage('build centos7 rpm') {
+      agent {
+        docker {
+          image '744520833807.dkr.ecr.us-east-1.amazonaws.com/mem/rpm-builder:package-snmptt-centos7'
+          registryUrl 'https://744520833807.dkr.ecr.us-east-1.amazonaws.com'
+          reuseNode true
+        }
+      }
+      steps {
+        script{
+          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} 7", returnStatus: true)
+          centos7BuildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
+          println("centos7BuildSucceeded: " + centos7BuildSucceeded)
+          if (!centos7BuildSucceeded) {
+            error("Failed to build Centos 7 RPM Package")
+          }
+          else {
+            centos7PackageName = sh(script: "ls package-7", returnStdout: true).trim()
+            centos7PackagePath = "${workingDirectory}/package-7/${centos7PackageName}"
+            println(centos7PackagePath)
+            sh "stat ${centos7PackagePath}"
+          }
+        }
+        
+      }
+    }
+
+    stage('build rocky9 rpm') {
+      agent {
+        docker {
+          image '744520833807.dkr.ecr.us-east-1.amazonaws.com/mem/rpm-builder:package-snmptt-rocky9'
+          registryUrl 'https://744520833807.dkr.ecr.us-east-1.amazonaws.com'
+          reuseNode true
+        }
+      }
+      steps {
+        script{
+          def buildScriptExitStatus = sh(script: "./ci/scripts/package-snmptt.sh ${tag_name} 9", returnStatus: true)
+          rocky9BuildSucceeded = verifyBuildSuccess(buildScriptExitStatus)
+          println("rocky9BuildSucceeded: " + rocky9BuildSucceeded)
+          if (!rocky9BuildSucceeded) {
+            error("Failed to build Rocky 9 RPM Package")
+          }
+          else {
+            rocky9PackageName = sh(script: "ls package-9", returnStdout: true).trim()
+            rocky9PackagePath = "${workingDirectory}/package-9/${rocky9PackageName}"
+            println(centos7PackagePath)
+            sh "stat ${rocky9PackagePath}"
+          }
+        }
+      }
+    }
+
+    stage('push centos7 rpm') {
+      when {
+        expression { centos7BuildSucceeded }
+      }
+      steps {
+        script {
+          curlCommand = "curl -F \"filename=${centos7PackagePath}\" -F \"release=7\" ${sysrepo}"
+          println(curlCommand)
+          sh "${curlCommand}"
+        }
+      }
+    }
+
+    stage('push rocky9 rpm') {
+      when {
+        expression { rocky9BuildSucceeded }
+      }
+      steps {
+        script {
+          curlCommand = "curl -F \"filename=${rocky9PackagePath}\" -F \"release=9\" ${sysrepo}"
+          println(curlCommand)
+          sh "${curlCommand}"
+        }
+      }
+    }
+
+  }
+  
+  post {
+    always {
+      cleanWs(cleanWhenAborted: true,
+              cleanWhenFailure: true,
+              cleanWhenNotBuilt: true,
+              cleanWhenSuccess: true,
+              cleanWhenUnstable: true,
+              deleteDirs: true,
+              disableDeferredWipeout: true
+      )
+    }
+  }
+}
